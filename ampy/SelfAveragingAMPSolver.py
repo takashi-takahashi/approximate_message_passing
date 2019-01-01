@@ -56,7 +56,7 @@ class SelfAveragingAMPSolver(object):
 
             abs_diff = np.linalg.norm(old_r - self.r) / np.sqrt(self.N)
 
-            if abs_diff < tolerance and iteration_index > 0:
+            if abs_diff < tolerance:
                 converged = True
                 if message:
                     print("requirement satisfied")
