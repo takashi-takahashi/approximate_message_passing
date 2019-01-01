@@ -2,6 +2,7 @@
 
 import numpy as np
 from .utils import utils
+import numba
 
 
 class AMPSolver(object):
@@ -27,12 +28,13 @@ class AMPSolver(object):
         self.R = np.random.normal(0.0, 1.0, self.N)
         self.T = np.random.uniform(0.5, 1.0, self.N)
 
-        self.r = np.random.normal(0.0, 1.0, self.N)  # estimator
-        self.chi = np.random.uniform(0.5, 1.0, self.N)  # variance
+        self.r = np.zeros(self.N)  # estimator
+        self.chi = np.ones(self.N)  # variance
 
         self.l = regularization_strength  # regularization parameter
         self.d = dumping_coefficient  # dumping coefficient
 
+    @numba.jit(parallel=True)
     def solve(self, max_iteration=50, tolerance=1e-5, message=False):
         """AMP solver
 
@@ -53,23 +55,29 @@ class AMPSolver(object):
             self.r = utils.update_dumping(self.r, new_r, self.d)
             self.chi = utils.update_dumping(self.chi, new_chi, self.d)
 
-            abs_diff = np.linalg.norm(old_r - self.r)
+            abs_diff = np.linalg.norm(old_r - self.r) / np.sqrt(self.N)
             if abs_diff < tolerance and iteration_index > 0:
                 convergence_flag = True
                 if message:
                     print("requirement satisfied")
                     print("abs_diff: ", abs_diff)
+                    print("abs_estimate: ", np.linalg.norm(self.r))
                     print("iteration number = ", iteration_index)
                     print()
                 break
         if convergence_flag:
-            print("converged")
-            print("abs_diff=", abs_diff)
-            print("iteration num=", iteration_index)
+            pass
+            # print("converged")
+            # print("abs_diff=", abs_diff)
+            # print("estimate norm=", np.linalg.norm(self.r))
+            # if np.linalg.norm(self.r) !=0.0 :
+            #     print("relative diff= ", abs_diff / np.linalg.norm(self.r))
+            # print("iteration num=", iteration_index)
         else:
             print("does not converged.")
             print()
 
+    @numba.jit(parallel=True)
     def __update_V(self):
         """ update V
 
@@ -78,6 +86,7 @@ class AMPSolver(object):
         """
         return self.A2 @ self.chi
 
+    @numba.jit(parallel=True)
     def __update_z(self):
         """ update z
 
@@ -86,6 +95,7 @@ class AMPSolver(object):
         """
         return self.y - self.A @ self.r + (self.V / (1.0 + self.V)) * self.z
 
+    @numba.jit(parallel=True)
     def __update_R(self):
         """ update R
 
@@ -96,6 +106,7 @@ class AMPSolver(object):
         v2 = self.A2.T @ (1.0 / (1.0 + self.V))
         return self.r + v1 / v2
 
+    @numba.jit(parallel=True)
     def __update_T(self):
         """ update T
 
@@ -105,6 +116,7 @@ class AMPSolver(object):
         v = self.A2.T @ (1.0 / (1.0 + self.V))
         return 1.0 / v
 
+    @numba.jit(parallel=True)
     def __update_r(self):
         """ update r
 
@@ -113,6 +125,7 @@ class AMPSolver(object):
         """
         return (self.R - self.l * self.T * np.sign(self.R)) * np.heaviside(np.abs(self.R) - self.l * self.T, 0.5)
 
+    @numba.jit(parallel=True)
     def __update_chi(self):
         """ update chi
 
