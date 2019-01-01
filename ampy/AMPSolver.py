@@ -56,7 +56,7 @@ class AMPSolver(object):
             self.chi = utils.update_dumping(self.chi, new_chi, self.d)
 
             abs_diff = np.linalg.norm(old_r - self.r) / np.sqrt(self.N)
-            if abs_diff < tolerance and iteration_index > 0:
+            if abs_diff < tolerance:
                 convergence_flag = True
                 if message:
                     print("requirement satisfied")
