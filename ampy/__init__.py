@@ -2,8 +2,10 @@
 
 from . import utils
 from . import AMPSolver
+from . import SelfAveragingAMPSolver
 
 __all__ = [
     'utils',
-    'AMPSolver'
+    'AMPSolver',
+    'SelfAveragingAMPSolver'
 ]
