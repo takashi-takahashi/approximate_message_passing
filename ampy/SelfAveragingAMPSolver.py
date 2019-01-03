@@ -47,7 +47,10 @@ class SelfAveragingAMPSolver(object):
         converged = False
 
         for iteration_index in range(max_iteration):
-            self.V, self.z, self.R, self.T = self.__update_V(), self.__update_z(), self.__update_R(), self.__update_T()
+            # self.V, self.z, self.R, self.T = self.__update_V(), self.__update_z(), self.__update_R(), self.__update_T()
+            self.V, self.z = self.__update_V(), self.__update_z()
+
+            self.R, self.T = self.__update_R(), self.__update_T()
 
             new_r, new_chi = self.__update_r(), self.__update_chi()
             old_r = self.r.copy()
