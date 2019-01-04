@@ -2,7 +2,7 @@
 
 import numpy  as np
 from .utils import utils
-import numpy
+import numba
 
 
 class NaiveSelfAveragingLMMSEVAMPSolver(object):
