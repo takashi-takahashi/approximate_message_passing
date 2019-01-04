@@ -15,6 +15,12 @@ These algorithms are implemented based on the following papers
     - a demonstration notebook for AMP 
 * Self Averaging AMP.ipynb  
     - a demonstration notebook for Self Averaging AMP
+* Naive Self Averaging VAMP.ipynb
+    - a demonstration notebook for Naive Self Averaging VAMP
+    - *Naive* in the sense that matrix inverse of size N x N
+* Self Averaging VAMP.ipynb
+    - a demonstration notebook for Self Averaging VAMP
+    - in this version singular value decomposition is utilized to avoid computational cost of N^3 
     
 ## requirements
 * Python version = 3.6.7
