@@ -3,11 +3,11 @@
 from . import utils
 from . import AMPSolver
 from . import SelfAveragingAMPSolver
-from . import SelfAveragingLMMSEVAMPSolver
+from . import NaiveSelfAveragingLMMSEVAMPSolver
 
 __all__ = [
     'utils',
     'AMPSolver',
     'SelfAveragingAMPSolver',
-    'SelfAveragingLMMSEVAMPSolver'
+    'NaiveSelfAveragingLMMSEVAMPSolver.py'
 ]

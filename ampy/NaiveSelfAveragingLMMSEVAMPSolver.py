@@ -5,7 +5,7 @@ from .utils import utils
 import numpy
 
 
-class SelfAveragingLMMSEVAMPSolver(object):
+class NaiveSelfAveragingLMMSEVAMPSolver(object):
     """ self averaging vector approximate message passing solver (LMMSE form) """
 
     def __init__(self, A, y, regularization_strength, dumping_coefficient):
@@ -17,6 +17,9 @@ class SelfAveragingLMMSEVAMPSolver(object):
             regularization_strength: regularization parameter
             dumping_coefficient: dumping coefficient
         """
+        self.l = regularization_strength
+        self.d = dumping_coefficient
+
         self.A = A.copy()
         self.y = y.copy()
 
@@ -54,7 +57,33 @@ class SelfAveragingLMMSEVAMPSolver(object):
         for iteration_index in range(max_iteration):
             old_x_hat_1 = self.x_hat_1.copy()
 
-            # update sequence are written here
+            # denonising
+            new_x_hat_1 = self.__update_x_hat_1()
+            new_alpha_1 = self.__update_alpha_1()
+            self.x_hat_1 = utils.update_dumping(old_x=self.x_hat_1, new_x=new_x_hat_1, dumping_coefficient=self.d)
+            self.alpha_1 = new_alpha_1
+            new_eta_1 = self.__update_eta_1()
+            self.eta_1 = np.clip(utils.update_dumping(old_x=self.eta_1, new_x=new_eta_1, dumping_coefficient=self.d),
+                                 a_min=1e-9,
+                                 a_max=1e9)
+
+            new_gamma_2 = self.__update_gamma_2()
+            self.gamma_2 = np.clip(new_gamma_2, a_min=1e-9, a_max=1e9)
+            new_r_2 = self.__update_r_2()
+            self.r_2 = new_r_2
+
+            # LMMSE estimation
+            new_x_hat_2 = self.__update_x_hat_2()
+            new_alpha_2 = self.__update_alpha_2()
+            self.x_hat_2 = new_x_hat_2
+            self.alpha_2 = new_alpha_2
+            new_eta_2 = self.__update_eta_2()
+            self.eta_2 = new_eta_2
+
+            new_gamma_1 = self.__update_gamma_1()
+            self.gamma_1 = np.clip(new_gamma_1, a_min=1e-9, a_max=1e9)
+            new_r_1 = self.__update_r_1()
+            self.r_1 = new_r_1
 
             abs_diff = np.linalg.norm(old_x_hat_1 - self.x_hat_1) / np.sqrt(self.N)
             if abs_diff < tolerance:
@@ -62,26 +91,26 @@ class SelfAveragingLMMSEVAMPSolver(object):
                 if message:
                     print("requirement satisfied")
                     print("abs_diff: ", abs_diff)
-                    print("abs_estimate: ", np.linalg.norm(self.r))
+                    print("abs_estimate: ", np.linalg.norm(self.x_hat_1))
                     print("iteration number = ", iteration_index)
                     print()
                 break
         if convergence_flag:
             pass
-            # print("converged")
-            # print("abs_diff=", abs_diff)
-            # print("estimate norm=", np.linalg.norm(self.r))
-            # if np.linalg.norm(self.r) !=0.0 :
-            #     print("relative diff= ", abs_diff / np.linalg.norm(self.r))
-            # print("iteration num=", iteration_index)
-            # print()
+            print("converged")
+            print("abs_diff=", abs_diff)
+            print("estimate norm=", np.linalg.norm(self.x_hat_1))
+            if np.linalg.norm(self.x_hat_1) != 0.0:
+                print("relative diff= ", abs_diff / np.linalg.norm(self.x_hat_1))
+            print("iteration num=", iteration_index)
+            print()
         else:
             print("does not converged.")
             print("abs_diff=", abs_diff)
             print("estimate norm=", np.linalg.norm(self.x_hat_1))
             if np.linalg.norm(self.x_hat_1) != 0.0:
                 print("relative diff= ", abs_diff / np.linalg.norm(self.x_hat_1))
-            print("iteration num=", iteration_index)
+            print("iteration num=", iteration_index + 1)
             print()
 
         return self.x_hat_1
@@ -92,7 +121,9 @@ class SelfAveragingLMMSEVAMPSolver(object):
         Returns:
             new x_hat_1
         """
-        pass
+        v1 = (self.r_1 - self.l / self.gamma_1 * np.sign(self.r_1))
+        v2 = np.heaviside(np.abs(self.r_1) - self.l / self.gamma_1, 0.5)
+        return v1 * v2
 
     def __update_alpha_1(self):
         """update alpha_1
@@ -100,7 +131,8 @@ class SelfAveragingLMMSEVAMPSolver(object):
         Returns:
             new alpha_1
         """
-        pass
+        v1 = np.heaviside(np.abs(self.r_1) - self.l / self.gamma_1, 0.5)
+        return np.mean(v1)
 
     def __update_eta_1(self):
         """update eta_1
@@ -108,7 +140,7 @@ class SelfAveragingLMMSEVAMPSolver(object):
         Returns:
             new eta_1
         """
-        pass
+        return self.gamma_1 / self.alpha_1
 
     def __update_gamma_2(self):
         """update gamma_2
@@ -116,7 +148,7 @@ class SelfAveragingLMMSEVAMPSolver(object):
         Returns:
             new gamma_2
         """
-        pass
+        return self.eta_1 - self.gamma_1
 
     def __update_r_2(self):
         """update r_2
@@ -124,7 +156,7 @@ class SelfAveragingLMMSEVAMPSolver(object):
         Returns:
             new r_2
         """
-        pass
+        return (self.eta_1 * self.x_hat_1 - self.gamma_1 * self.r_1) / self.gamma_2
 
     def __update_x_hat_2(self):
         """update x_hat_2
@@ -132,7 +164,9 @@ class SelfAveragingLMMSEVAMPSolver(object):
         Returns:
             new x_hat_2
         """
-        pass
+        a = self.A.T @ self.A + self.gamma_2 * np.eye(self.N)
+        b = self.A.T @ self.y + self.gamma_2 * self.r_2
+        return np.linalg.solve(a, b)
 
     def __update_alpha_2(self):
         """update alpha_2
@@ -140,7 +174,8 @@ class SelfAveragingLMMSEVAMPSolver(object):
         Returns:
             new alpha_2
         """
-        pass
+        a = self.A.T @ self.A + self.gamma_2 * np.eye(self.N)
+        return self.gamma_2 * np.trace(np.linalg.inv(a)) / self.N
 
     def __update_eta_2(self):
         """update eta_2
@@ -148,7 +183,7 @@ class SelfAveragingLMMSEVAMPSolver(object):
         Returns:
             new eta_2
         """
-        pass
+        return self.gamma_2 / self.alpha_2
 
     def __update_gamma_1(self):
         """update gamma_1
@@ -156,7 +191,7 @@ class SelfAveragingLMMSEVAMPSolver(object):
         Returns:
             new gamma_1
         """
-        pass
+        return self.eta_2 - self.gamma_2
 
     def __update_r_1(self):
         """update r_1
@@ -164,4 +199,8 @@ class SelfAveragingLMMSEVAMPSolver(object):
         Returns:
             new r_1
         """
+        return (self.eta_2 * self.x_hat_2 - self.gamma_2 * self.r_2) / self.gamma_1
+
+    def show_me(self):
+        """debug method"""
         pass
