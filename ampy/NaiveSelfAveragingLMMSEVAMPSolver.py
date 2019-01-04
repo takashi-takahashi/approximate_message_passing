@@ -6,7 +6,9 @@ import numba
 
 
 class NaiveSelfAveragingLMMSEVAMPSolver(object):
-    """ self averaging vector approximate message passing solver (LMMSE form) """
+    """ Naive self averaging vector approximate message passing solver (LMMSE form)
+        in this version, inverse calculation of N x N matrix is used.
+    """
 
     def __init__(self, A, y, regularization_strength, dumping_coefficient):
         """constructor
