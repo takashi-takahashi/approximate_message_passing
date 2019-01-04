@@ -11,14 +11,14 @@ These algorithms are implemented based on the following papers
 ## content
 * ampy
     - approximate message passing solvers for the Standard Linear Model
-* AMP.ipynb
+* [0]AMP.ipynb
     - a demonstration notebook for AMP 
-* Self Averaging AMP.ipynb  
+* [1]Self Averaging AMP.ipynb  
     - a demonstration notebook for Self Averaging AMP
-* Naive Self Averaging VAMP.ipynb
+* [2]Naive Self Averaging VAMP.ipynb
     - a demonstration notebook for Naive Self Averaging VAMP
     - *Naive* in the sense that matrix inverse of size N x N
-* Self Averaging VAMP.ipynb
+* [3]Self Averaging VAMP.ipynb
     - a demonstration notebook for Self Averaging VAMP
     - in this version singular value decomposition is utilized to avoid computational cost of N^3 
     
