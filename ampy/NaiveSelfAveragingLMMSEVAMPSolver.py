@@ -39,6 +39,7 @@ class NaiveSelfAveragingLMMSEVAMPSolver(object):
         self.gamma_1 = 1.0
         self.r_1 = np.random.normal(0.0, 1.0, self.N)
 
+    @numba.jit(parallel=True)
     def solve(self, max_iteration=50, tolerance=1e-5, message=False):
         """VAMP solver
 
@@ -115,6 +116,7 @@ class NaiveSelfAveragingLMMSEVAMPSolver(object):
 
         return self.x_hat_1
 
+    @numba.jit(parallel=True)
     def __update_x_hat_1(self):
         """ update x_hat_1
 
@@ -125,6 +127,7 @@ class NaiveSelfAveragingLMMSEVAMPSolver(object):
         v2 = np.heaviside(np.abs(self.r_1) - self.l / self.gamma_1, 0.5)
         return v1 * v2
 
+    @numba.jit(parallel=True)
     def __update_alpha_1(self):
         """update alpha_1
 
@@ -134,6 +137,7 @@ class NaiveSelfAveragingLMMSEVAMPSolver(object):
         v1 = np.heaviside(np.abs(self.r_1) - self.l / self.gamma_1, 0.5)
         return np.mean(v1)
 
+    @numba.jit(parallel=True)
     def __update_eta_1(self):
         """update eta_1
 
@@ -142,6 +146,7 @@ class NaiveSelfAveragingLMMSEVAMPSolver(object):
         """
         return self.gamma_1 / self.alpha_1
 
+    @numba.jit(parallel=True)
     def __update_gamma_2(self):
         """update gamma_2
 
@@ -150,6 +155,7 @@ class NaiveSelfAveragingLMMSEVAMPSolver(object):
         """
         return self.eta_1 - self.gamma_1
 
+    @numba.jit(parallel=True)
     def __update_r_2(self):
         """update r_2
 
@@ -158,6 +164,7 @@ class NaiveSelfAveragingLMMSEVAMPSolver(object):
         """
         return (self.eta_1 * self.x_hat_1 - self.gamma_1 * self.r_1) / self.gamma_2
 
+    @numba.jit(parallel=True)
     def __update_x_hat_2(self):
         """update x_hat_2
 
@@ -168,6 +175,7 @@ class NaiveSelfAveragingLMMSEVAMPSolver(object):
         b = self.A.T @ self.y + self.gamma_2 * self.r_2
         return np.linalg.solve(a, b)
 
+    @numba.jit(parallel=True)
     def __update_alpha_2(self):
         """update alpha_2
 
@@ -177,6 +185,7 @@ class NaiveSelfAveragingLMMSEVAMPSolver(object):
         a = self.A.T @ self.A + self.gamma_2 * np.eye(self.N)
         return self.gamma_2 * np.trace(np.linalg.inv(a)) / self.N
 
+    @numba.jit(parallel=True)
     def __update_eta_2(self):
         """update eta_2
 
@@ -185,6 +194,7 @@ class NaiveSelfAveragingLMMSEVAMPSolver(object):
         """
         return self.gamma_2 / self.alpha_2
 
+    @numba.jit(parallel=True)
     def __update_gamma_1(self):
         """update gamma_1
 
@@ -193,6 +203,7 @@ class NaiveSelfAveragingLMMSEVAMPSolver(object):
         """
         return self.eta_2 - self.gamma_2
 
+    @numba.jit(parallel=True)
     def __update_r_1(self):
         """update r_1
 
