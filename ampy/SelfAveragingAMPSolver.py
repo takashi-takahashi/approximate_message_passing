@@ -65,7 +65,7 @@ class SelfAveragingAMPSolver(object):
                     print("requirement satisfied")
                     print("abs_diff=", abs_diff)
                     print("abs_estimate=", np.linalg.norm(self.r))
-                    print("iteration number=", iteration_index)
+                    print("iteration number=", iteration_index + 1)
                 break
 
         if converged:
@@ -75,14 +75,14 @@ class SelfAveragingAMPSolver(object):
             # print("estimate norm=", np.linalg.norm(self.r))
             # if np.linalg.norm(self.r) != 0.0:
             #     print("relative diff= ", abs_diff / np.linalg.norm(self.r))
-            # print("iteration num=", iteration_index)
+            # print("iteration num=", iteration_index + 1)
         else:
             print("does not converged.")
             print("abs_diff=", abs_diff)
             print("estimate norm=", np.linalg.norm(self.r))
             if np.linalg.norm(self.r) != 0.0:
                 print("relative diff= ", abs_diff / np.linalg.norm(self.r))
-            print("iteration num=", iteration_index)
+            print("iteration num=", iteration_index + 1)
             print()
 
     @numba.jit(parallel=True)

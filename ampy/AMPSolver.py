@@ -65,7 +65,7 @@ class AMPSolver(object):
                     print("requirement satisfied")
                     print("abs_diff: ", abs_diff)
                     print("abs_estimate: ", np.linalg.norm(self.r))
-                    print("iteration number = ", iteration_index)
+                    print("iteration number = ", iteration_index + 1)
                     print()
                 break
         if convergence_flag:
@@ -75,7 +75,7 @@ class AMPSolver(object):
             # print("estimate norm=", np.linalg.norm(self.r))
             # if np.linalg.norm(self.r) !=0.0 :
             #     print("relative diff= ", abs_diff / np.linalg.norm(self.r))
-            # print("iteration num=", iteration_index)
+            # print("iteration num=", iteration_index + 1)
             # print()
         else:
             print("does not converged.")
@@ -83,7 +83,7 @@ class AMPSolver(object):
             print("estimate norm=", np.linalg.norm(self.r))
             if np.linalg.norm(self.r) !=0.0 :
                 print("relative diff= ", abs_diff / np.linalg.norm(self.r))
-            print("iteration num=", iteration_index)
+            print("iteration num=", iteration_index + 1)
             print()
 
     @numba.jit(parallel=True)
