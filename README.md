@@ -20,7 +20,8 @@ These algorithms are implemented based on the following papers
     - *Naive* in the sense that matrix inverse of size N x N
 * [3]Self Averaging VAMP.ipynb
     - a demonstration notebook for Self Averaging VAMP
-    - in this version singular value decomposition is utilized to avoid computational cost of N^3 
+    - in this version singular value decomposition is utilized to avoid computational cost of N^3 for each iteration
+* [3-1]: same with the [3] except that the observation matrix is ​​drawn from random DCT matrix ensemble. 
     
 ## requirements
 * Python version = 3.6.7
